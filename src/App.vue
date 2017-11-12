@@ -7,7 +7,7 @@
 
       </div>
       <div class="icon-item">
-        <Badge count="3">
+        <Badge :count="iminfo.totalNotReadMsg">
           <router-link to="/msg" title="消息">
             <Icon type="chatbox-working" size="26"></Icon>
           </router-link>
@@ -31,9 +31,15 @@
 </template>
 
 <script>
+import im from '@/api/im';
 export default {
-  name: 'app'
-}
+  name: 'app',
+  data() {
+    return {
+      iminfo: im.info
+    };
+  }
+};
 </script>
 <style scoped>
 #app {
@@ -49,11 +55,11 @@ export default {
 }
 
 .left a {
-  color: #DBDBDB;
+  color: #dbdbdb;
 }
 
 .left a.router-link-active {
-  color: #18CF6B;
+  color: #18cf6b;
 }
 
 .avata {

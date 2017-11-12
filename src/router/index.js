@@ -6,10 +6,10 @@ import msger from '@/components/messager'
 Vue.use(Router)
 
 export default new Router({
-  mode: 'history', //后端支持可开
+  mode: 'history', // 后端支持可开
   scrollBehavior: () => ({ y: 0 }),
   routes: [
-    { path: '/msg', name: 'msg', component: msg},
+    { path: '/msg', name: 'msg', component: msg },
     { path: '/work',
       name: 'work',
       component: work,

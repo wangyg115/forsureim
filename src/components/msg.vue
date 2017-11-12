@@ -2,67 +2,95 @@
   <div class="msg">
     <div class="msgmenu">
       <div class="search">
-        <input type="text" placeholder="搜索">
+        <input type="text" placeholder="用户名" v-model="user.jid">
+        <!-- <input type="text" placeholder="pass" v-model="user.pass"><br> -->
+        <input type="button" value="connect" @click="connect">
       </div>
-      <Menu active-name="1-2" width="200px" :open-names="['1']">
-        <Submenu name="1">
-          <template slot="title">
-            <Icon type="ios-navigate"></Icon>
-            导航一
-          </template>
-          <MenuItem name="1-1">选项 1</MenuItem>
-          <MenuItem name="1-2">选项 2</MenuItem>
-          <MenuItem name="1-3">选项 3</MenuItem>
-        </Submenu>
-        <Submenu name="2">
-          <template slot="title">
-            <Icon type="ios-keypad"></Icon>
-            导航二
-          </template>
-          <MenuItem name="2-1">选项 1</MenuItem>
-          <MenuItem name="2-2">选项 2</MenuItem>
-        </Submenu>
-        <Submenu name="3">
-          <template slot="title">
-            <Icon type="ios-analytics"></Icon>
-            导航三
-          </template>
-          <MenuItem name="3-1">选项 1</MenuItem>
-          <MenuItem name="3-2">选项 2</MenuItem>
-        </Submenu>
+      <Menu active-name="1" width="240px" @on-select="setCR">
+        <template v-for="(item, index) in rosters" >
+        <MenuItem :name="index" :key="index"  class="p-item">
+          <Badge :count="item.notReadedMsg" :key="index">
+            <div class="p-item-pic" :key="index"><div>{{item.realname.substr(1)}}</div></div>
+          </Badge>
+          <div class="p-item-content" :key="index">
+            <div style="display: flex">
+            <div class="p-i-c-title">{{item.realname}}{{item.jid.split('@')[0]}}</div>
+
+            <div class="p-item-msgtime" >{{item.lastMsgTime}}</div>
+            </div>
+            <div class="p-i-c-msg" :key="index">{{item.lastMsg}}</div>
+          </div>
+
+       </MenuItem>
+        </template>
       </Menu>
     </div>
     <div class="msgcontent">
-      <router-view></router-view>
+      <msger :to-who="crPerson"></msger>
     </div>
 
   </div>
 </template>
+
+</script>
+
 <script>
+// import { mapGetters } from 'vuex';
+import msger from '@/components/messager'
+import im from '@/api/im'
 export default {
   name: 'work',
   data() {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      user: {
+        jid: '',
+        pass: '123456'
+
+      },
+      rosters: im.rosters,
+      msg: '',
+      crp: 0
+    };
+  },
+  computed: {
+    // ...mapGetters(['rosters']),
+    crPerson() {
+      return this.rosters[this.crp];
     }
-  }
-}
+  },
+  methods: {
+    setCR(i) {
+      this.crp = i;
+      im.info.totalNotReadMsg -= this.crPerson.notReadedMsg
+      this.crPerson.notReadedMsg = 0;
+    },
+    handleClose(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    connect() {
+      im.connect(this.user.jid + '@localhost', this.user.pass);
+    }
+  },
+  components: { msger }
+};
 </script>
 <style scoped>
 .msg {
   width: 100%;
   height: 100%;
+  display: flex;
 }
 
 .msgmenu {
-  width: 200px;
+  width: 240px;
   height: 100%;
   background-color: white;
   border-right-style: solid;
-  border-right-color: #DBDBDB;
+  border-right-color: #dbdbdb;
   border-right-width: 1px;
 }
-.search{
+
+.search {
   width: 100%;
   height: 70px;
   display: flex;
@@ -70,11 +98,55 @@ export default {
   justify-content: center;
 }
 
+.p-item {
+  padding: 5px;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.p-item-pic {
+  width: 42px;
+  height: 42px;
+  background: #3399ff;
+  border-radius: 6px;
+  float: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: yellow;
+}
+
+.p-item-content {
+  padding: 5px;
+  width: 190px;
+  height: 42px;
+  float: left;
+}
+
+.p-i-c-title {
+  width: 145px;
+  color: black;
+}
+
+.p-i-c-msg {
+  color: black;
+  font-size: 12px;
+}
+
+.p-item-msgtime {
+  padding-top: 5px;
+  float: right;
+  font-size: 12px;
+}
+
 .msgcontent {
   flex-grow: 1;
 }
-.ivu-menu-item-selected{
-  background-color: #DBDBDB;
+
+.ivu-menu-item-selected {
+  background-color: #dbdbdb;
 }
 </style>
 
