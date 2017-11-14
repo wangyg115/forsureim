@@ -5,9 +5,10 @@
     </div>
     <div class="msger-content">
       <template v-for="(item, index) in receivedMessages" >
-      <div class="msg-item"  :key="index">
+      <div class="msg-item" :class="{msgsend:item.send}"  :key="index">
         <div class="avata">
-          <div>{{toWho.realname.substr(1)}}</div>
+          <div  v-if="item.send">{{user.realname.substr(1)}}</div>
+          <div  v-else>{{toWho.sortName()}}</div>
         </div>
         <div class="msgcontent">{{item.msgtext}}</div>
       </div>
@@ -32,13 +33,12 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import _ from 'lodash/core'
+// import _ from 'lodash/core'
 import im from '@/api/im'
 export default {
   name: 'Messager',
   data() {
     return {
-      messages: im.receivedMessages,
       message: 'Welcome to Your Vue.js App'
     };
   },
@@ -52,7 +52,11 @@ export default {
   },
   computed: {
     ...mapGetters(['user']),
-    receivedMessages() { return _.filter(this.messages, o => o.from.startsWith(this.toWho.jid)) }
+    receivedMessages() {
+      im.info.totalNotReadMsg -= this.toWho.notReadedMsg
+      this.toWho.notReadedMsg = 0;
+      return this.toWho.msgfrom
+    }
   }
 }
 </script>
@@ -85,9 +89,12 @@ export default {
   overflow-y: auto;
 }
 .msger-content .msg-item{
-  max-width: 80%;
+  /* max-width: 80%; */
   padding: 10px;
   display: flex;
+}
+.msger-content .msgsend{
+  flex-direction: row-reverse;
 }
 .msger-content .msg-item .avata{
   background-color: #99CCFF;
@@ -109,9 +116,13 @@ export default {
 .msger-content .msg-item .msgcontent{
   background-color:white;
   margin-left: 10px;
+  margin-right: 10px;
   border-radius: 6px;
   padding: 5px;
   /* flex-grow: 1; */
+}
+.msger-content .msgsend .msgcontent{
+ background-color: #CCFF99;
 }
 .msger-menu{
   font-size: 20px;

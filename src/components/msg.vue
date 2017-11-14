@@ -2,19 +2,18 @@
   <div class="msg">
     <div class="msgmenu">
       <div class="search">
-        <input type="text" placeholder="用户名" v-model="user.jid">
-        <!-- <input type="text" placeholder="pass" v-model="user.pass"><br> -->
-        <input type="button" value="connect" @click="connect">
+        <input type="text" placeholder="搜索">
+        <input type="button" value="断开连接" @click="disConnct">
       </div>
       <Menu active-name="1" width="240px" @on-select="setCR">
         <template v-for="(item, index) in rosters" >
         <MenuItem :name="index" :key="index"  class="p-item">
           <Badge :count="item.notReadedMsg" :key="index">
-            <div class="p-item-pic" :key="index"><div>{{item.realname.substr(1)}}</div></div>
+            <div class="p-item-pic" :key="index"><div>{{item.sortName()}}</div></div>
           </Badge>
           <div class="p-item-content" :key="index">
             <div style="display: flex">
-            <div class="p-i-c-title">{{item.realname}}{{item.jid.split('@')[0]}}</div>
+            <div class="p-i-c-title">{{item.realname}}</div>
 
             <div class="p-item-msgtime" >{{item.lastMsgTime}}</div>
             </div>
@@ -42,11 +41,6 @@ export default {
   name: 'work',
   data() {
     return {
-      user: {
-        jid: '',
-        pass: '123456'
-
-      },
       rosters: im.rosters,
       msg: '',
       crp: 0
@@ -64,11 +58,8 @@ export default {
       im.info.totalNotReadMsg -= this.crPerson.notReadedMsg
       this.crPerson.notReadedMsg = 0;
     },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    connect() {
-      im.connect(this.user.jid + '@localhost', this.user.pass);
+    disConnct() {
+      im.disconnect()
     }
   },
   components: { msger }
