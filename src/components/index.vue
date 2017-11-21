@@ -1,9 +1,11 @@
 <template>
+  <!-- <transition name="slide-up"> -->
   <div id="app">
     <div class="left">
       <div class="avata">
+        <div class="ava-photo">{{user.realname}}</div>
 
-        <img src="static/3.png" class="ava-photo"></img>
+        <!-- <img src="static/3.png" class="ava-photo"></img> -->
 
       </div>
       <div class="icon-item">
@@ -25,12 +27,16 @@
       </div>
     </div>
     <div class="center">
+      <transition name="fade" mode="out-in">
       <router-view></router-view>
+      </transition>
     </div>
   </div>
+  <!-- </transition> -->
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import im from '@/api/im';
 export default {
   name: 'app',
@@ -38,6 +44,9 @@ export default {
     return {
       iminfo: im.info
     };
+  },
+  computed: {
+    ...mapGetters(['user'])
   }
 };
 </script>
@@ -87,9 +96,16 @@ export default {
 .ava-photo {
   width: 42px;
   height: 42px;
-  background: #eee;
+  background: #9cf;
   border-radius: 6px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: yellow;
+}
+::-webkit-scrollbar {
+  width: 2px;
+  /* height: 1px; */
 }
 </style>
 

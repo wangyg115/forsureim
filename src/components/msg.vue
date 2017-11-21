@@ -5,7 +5,8 @@
         <input type="text" placeholder="搜索">
         <input type="button" value="断开连接" @click="disConnct">
       </div>
-      <Menu active-name="1" width="240px" @on-select="setCR">
+      <div class="menuitem">
+      <Menu active-name="1" width="240px" @on-select="setCR" style="overflow-y">
         <template v-for="(item, index) in rosters" >
         <MenuItem :name="index" :key="index"  class="p-item">
           <Badge :count="item.notReadedMsg" :key="index">
@@ -23,6 +24,7 @@
        </MenuItem>
         </template>
       </Menu>
+      </div>
     </div>
     <div class="msgcontent">
       <msger :to-who="crPerson"></msger>
@@ -43,7 +45,7 @@ export default {
     return {
       rosters: im.rosters,
       msg: '',
-      crp: 0
+      crp: 2
     };
   },
   computed: {
@@ -75,6 +77,8 @@ export default {
 .msgmenu {
   width: 240px;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   background-color: white;
   border-right-style: solid;
   border-right-color: #dbdbdb;
@@ -87,6 +91,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.menuitem{
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .p-item {
@@ -137,7 +146,16 @@ export default {
 }
 
 .ivu-menu-item-selected {
-  background-color: #dbdbdb;
+  background-color: #ccf;
+}
+::-webkit-scrollbar {
+  width: 2px;
+  /* height: 1px; */
+}
+::-webkit-scrollbar-thumb
+{
+  border-radius: 2px;
+  background-color: #cf9;
 }
 </style>
 

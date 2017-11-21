@@ -1,6 +1,8 @@
 <template>
   <div id="app">
+    <transition name="fade" mode="out-in">
       <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -14,6 +16,7 @@ export default {
   display: flex;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 </style>
 

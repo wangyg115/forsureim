@@ -11,8 +11,15 @@ Vue.use(iView);
 
 router.beforeEach((to, from, next) => {
   iView.LoadingBar.start();
-  // Util.title(to.meta.title);
-  next();
+  const realname = store.state.user.realname;
+  if (realname === '' && to.path !== '/') {
+    next('/');
+  } else if (realname !== '' && to.path === '/') {
+    next('/msg');
+    iView.LoadingBar.finish();
+  } else {
+    next();
+  }
 });
 
 router.afterEach(() => {

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import msg from '@/components/msg'
 import work from '@/components/work'
+import roster from '@/components/roster'
 // import msger from '@/components/messager'
 import login from '@/components/login'
 import index from '@/components/index'
@@ -17,6 +18,13 @@ export default new Router({
       component: index,
       children: [
         { path: '', component: msg, name: 'messager' }
+      ]
+    },
+    { path: '/roster',
+      // name: 'work',
+      component: index,
+      children: [
+        { path: '', component: roster }
       ]
     },
     { path: '/work',

@@ -1,9 +1,8 @@
 
 const user = {
   state: {
-    realname: '王玉贵',
-    jid: 'wangyg@localhost',
-    password: ''
+    realname: '',
+    jid: ''
   },
 
   mutations: {
@@ -20,6 +19,10 @@ const user = {
       commit('SET_NAME', realname);
     },
     setJid({ commit }, jid) {
+      commit('SET_JID', jid);
+    },
+    setUser({ commit }, { realname, jid }) {
+      commit('SET_NAME', realname);
       commit('SET_JID', jid);
     }
   }

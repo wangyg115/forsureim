@@ -1,9 +1,16 @@
 <template>
-  <div class="logincontainer">
+  <!-- <transition name="slide-up"> -->
+  <div class="logincontainer" id="logincontainer">
+    <div class="logincenter">
+    <div class="apptitle">
+      <img src="static/logo.png" class="applogo"></img>
+      <div>内蒙联通系统集成即时通讯演示</div>
+
+    </div>
     <div class="formdiv">
   <Form ref="formInline" :model="formInline" :rules="ruleInline">
-    <FormItem prop="user">
-      <Input type="text" v-model="formInline.user" placeholder="用户名">
+    <FormItem prop="username">
+      <Input type="text" v-model="formInline.username" placeholder="用户名">
         <Icon type="ios-person-outline" slot="prepend"></Icon>
       </Input>
     </FormItem>
@@ -13,31 +20,46 @@
       </Input>
     </FormItem>
     <FormItem>
-      <Button type="primary" @click="handleSubmit('formInline')"  :loading="loading" style="width:100%">
+      <Button type="primary" @click="handleSubmit('formInline')" :loading="loading" style="width:100%">
         <span v-if="!loading">连 接</span>
         <span v-else>正在连接...</span>
       </Button>
     </FormItem>
   </Form>
+
+  </div>
+  <div class="appinfo">Powered by&nbsp; <a href="http://www.tigase.net/" target="_blank">Tigase</a>&nbsp;&nbsp;
+    <a href="http://strophe.im/strophejs/" target="_blank">Strophe.js</a>&nbsp;&nbsp;
+    <a href="https://cn.vuejs.org/" target="_blank">vuejs</a>&nbsp;&nbsp;
+    <a href="https://www.iviewui.com/" target="_blank">iview</a>&nbsp;&nbsp;   内蒙联通系统集成软研部</div>
   </div>
   </div>
+  <!-- </transition> -->
 </template>
+
 <script>
 import im from '@/api/im'
 const log = function(msg) {
   console.log(msg);
+}
+function changeBackgound() {
+  const msgdiv = document.getElementById('logincontainer');
+
+  console.log(msgdiv)
+  const bg = 'url("https://images.unsplash.com/photo-1435783099294-283725c37230?auto=format&fit=crop&w=1400&q=60&ixid=dW5zcGxhc2guY29tOzs7Ozs%3D") 50% 50% / cover';
+  msgdiv.style.backgroundImage = bg;
 }
 export default {
   data() {
     return {
       loading: false,
       formInline: {
-        user: '',
+        username: '',
         password: ''
       },
       connect: false,
       ruleInline: {
-        user: [
+        username: [
           {
             required: true,
             message: '请输入用户名',
@@ -65,10 +87,10 @@ export default {
       this.loading = true;
       this.$refs[name].validate(valid => {
         if (valid) {
-          im.connect(this.formInline.user + '@localhost', this.formInline.password, this.onConnect);
+          im.connect(this.formInline.username + '@localhost', this.formInline.password, this.onConnect);
           // this.$Message.success('Success!');
         } else {
-          this.$Message.error('Fail!');
+          this.$Message.error('请输入用户名和密码');
           this.loading = false;
         }
       });
@@ -82,11 +104,14 @@ export default {
         log('Strophe is disconnecting.');
       } else if (status === Strophe.Status.DISCONNECTED) {
         this.onFail('连接已经断开');
+        this.$store.dispatch('setUser', { realname: '', jid: '' });
         this.$router.push('/');
       } else if (status === Strophe.Status.CONNECTED) {
         this.connect = true;
-        im.addHandler()
-        im.send($pres().tree())
+        im.addHandler();
+        im.send($pres().tree());
+        this.$store.dispatch('setUser', im.getUser(this.formInline.username + '@localhost'))
+        im.roomPresent(this.$store.state.user);
         this.$router.push('/msg');
       } else if (status === Strophe.Status.AUTHFAIL) {
         this.onFail('用户验证失败');
@@ -95,7 +120,8 @@ export default {
       }
                 // this.connect = true;
     },
-    mounted() {
+    activated() {
+      //changeBackgound();
       // im.onConnected = this.onConnect;
     },
     onFail(msg) {
@@ -115,8 +141,28 @@ export default {
   height: 100%;
   align-items: center;
   justify-content: center;
-  background: url("https://images.unsplash.com/photo-1448794363755-de84d6a770bc?w=2200")
-    50% 50% / cover;
+  background: url("https://images.unsplash.com/photo-1435783099294-283725c37230?auto=format&fit=crop&w=1400&q=60&ixid=dW5zcGxhc2guY29tOzs7Ozs%3D")
+    /* 50% 50% / cover; */
+}
+.logincenter{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction:column;
+}
+.apptitle{
+  color:white;
+  height: 70px;
+  font-size: 2.5em;
+  display: flex;
+  justify-content: center;
+}
+.applogo{
+  width: 85px;
+  height: 60px;
+}
+.apptitle>div{
+  padding-left: 10px;
 }
 .formdiv{
   width: 300px;
@@ -124,5 +170,13 @@ export default {
   padding: 30px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.6);
+}
+.appinfo{
+  font-size: 1em;
+  color: white;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
