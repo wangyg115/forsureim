@@ -87,7 +87,7 @@ export default {
       this.loading = true;
       this.$refs[name].validate(valid => {
         if (valid) {
-          im.connect(this.formInline.username + '@localhost', this.formInline.password, this.onConnect);
+          im.connect(this.formInline.username + '@localhost', this.formInline.password, this.onConnected,this.onFail,this.onDisConnect);
           // this.$Message.success('Success!');
         } else {
           this.$Message.error('请输入用户名和密码');
@@ -95,31 +95,17 @@ export default {
         }
       });
     },
-    onConnect(status) {
-      if (status === Strophe.Status.CONNECTING) {
-        log('Strophe is connecting.');
-      } else if (status === Strophe.Status.CONNFAIL) {
-        this.onFail('连接失败');
-      } else if (status === Strophe.Status.DISCONNECTING) {
-        log('Strophe is disconnecting.');
-      } else if (status === Strophe.Status.DISCONNECTED) {
-        this.onFail('连接已经断开');
-        this.$store.dispatch('setUser', { realname: '', jid: '' });
-        this.$router.push('/');
-      } else if (status === Strophe.Status.CONNECTED) {
-        this.connect = true;
-        im.addHandler();
-        im.send($pres().tree());
-        this.$store.dispatch('setUser', im.getUser(this.formInline.username + '@localhost'))
-        im.roomPresent(this.$store.state.user);
-        this.$router.push('/msg');
-      } else if (status === Strophe.Status.AUTHFAIL) {
-        this.onFail('用户验证失败');
-      } else if (status === Strophe.Status.CONNTIMEOUT) {
-        this.onFail('连接超时');
-      }
-                // this.connect = true;
+    onDisConnect(){
+      this.onFail('连接已经断开');
+      this.$store.dispatch('setUser', { realname: '', jid: '' });
+      this.$router.push('/');
     },
+    onConnected(){
+      this.connect = true;
+      this.$store.dispatch('setUser', im.getUser())
+      this.$router.push('/msg');
+    },
+
     activated() {
       //changeBackgound();
       // im.onConnected = this.onConnect;

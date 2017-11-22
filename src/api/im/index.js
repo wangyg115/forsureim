@@ -57,15 +57,16 @@ function onMessage(msg) {
   const elems = msg.getElementsByTagName('body');
 
   if ((type === 'chat' || type === 'groupchat') && elems.length > 0) {
-    if (type === 'groupchat' && from.endsWith(cruser.realname)) {
-      log('ECHOBOT: I got a message from ' + from);
-      return true;
-    }
+    // if (type === 'groupchat' && from.endsWith(cruser.realname)) {
+    //   log('ECHOBOT: I got a message from ' + from);
+    //   return true;
+    // }
     const body = elems[0];
     const msgtext = Strophe.getText(body);
-    // receivedMessages.push({ from, to, msgtext });
     const fromperson = _.find(rosters, o => from.startsWith(o.jid));
-    fromperson.msgfrom.push({ send: false, from, to, msgtext });
+    let send=false;
+    if (type === 'groupchat' && from.endsWith(cruser.realname)) send=true;
+    fromperson.msgfrom.push({ send, from, to, msgtext });
     fromperson.lastMsg = msgtext.length > 10 ? msgtext.substr(0, 10) + '...' : msgtext;
     const d1 = new Date();
     fromperson.lastMsgTime = d1.getHours() + ':' + d1.getMinutes()
@@ -75,38 +76,41 @@ function onMessage(msg) {
   }
   return true;
 }
-function getUser(jid) {
-  cruser = _.find(this.rosters, o => o.jid === jid)
+function getUser() {
   return cruser;
 }
+// let connected = function(){}
+// function disConnect(){}
+// function fall(){}
 const connection = new Strophe.Connection(BOSH_SERVICE);
 connection.rawInput = rawInput;
 connection.rawOutput = rawOutput;
-// function onConnect(status) {
-//   if (status === Strophe.Status.CONNECTING) {
-//     log('Strophe is connecting.');
-//   } else if (status === Strophe.Status.CONNFAIL) {
-//     onConnFail();
-//   } else if (status === Strophe.Status.DISCONNECTING) {
-//     log('Strophe is disconnecting.');
-//   } else if (status === Strophe.Status.DISCONNECTED) {
-//     log('Strophe is disconnected.');
-//   } else if (status === Strophe.Status.CONNECTED) {
-//     connection.addHandler(onMessage, null, 'message', null, null, null);
-//     connection.send($pres().tree());
-//     connectSuccess();
-//   } else if (status === Strophe.Status.AUTHFAIL) {
-//     this.onFail('用户验证失败');
-//   } else if (status === Strophe.Status.CONNTIMEOUT) {
-//     this.onFail('连接超时');
-//   }
-// }
 
-function connect(jid, pass, onConnect) {
-  // return new Promise((resolve, reject)=>{
-  //   connection.connect(jid, pass, onConnect);
-  // });
-  connection.connect(jid, pass, onConnect);
+function connect(jid, pass, onSussess,onFall,onDisconn) {
+  connection.connect(jid, pass, status=>{
+    if (status === Strophe.Status.CONNECTING) {
+      log('正在连接...');
+    } else if (status === Strophe.Status.CONNFAIL) {
+      onFall('连接失败');
+    } else if (status === Strophe.Status.DISCONNECTING) {
+      log('Strophe 正在断开...');
+    } else if (status === Strophe.Status.DISCONNECTED) {
+      log('Strophe 已经断开.');
+      onDisconn();
+    } else if (status === Strophe.Status.CONNECTED) {
+      cruser = _.find(this.rosters, o => o.jid === jid)
+      connection.addHandler(onMessage, null, 'message', null, null, null);
+      connection.send($pres().tree());
+      this.roomPresent();
+      onSussess();
+    } else if (status === Strophe.Status.AUTHFAIL) {
+      log('用户验证失败');
+      onFall('用户验证失败');
+      log('用户验证失败');
+    } else if (status === Strophe.Status.CONNTIMEOUT) {
+      onFall('连接超时');
+    }
+  });
 }
 
 function present(from, roomjid, nickname) {
@@ -115,12 +119,8 @@ function present(from, roomjid, nickname) {
     to: roomjid + '/' + nickname }).c('x', { xmlns: 'http://jabber.org/protocol/muc' }).tree());
 }
 
-function roomPresent(user) {
-  _.each(this.rooms, r => present(user.jid, r.jid, user.realname))
-  // for (room in this.rooms) {
-  //   console.info(room)
-  //   present(user.jid, room.jid, user.realname);
-  // }
+function roomPresent() {
+  _.each(this.rooms, r => present(cruser.jid, r.jid, cruser.realname))
 }
 
 function disconnect() {
@@ -130,18 +130,18 @@ function sendMsg(to, from, msgtext, type) {
   const reply = $msg({ to, from, type }).cnode(Strophe.xmlElement('body', '', msgtext));
   connection.send(reply.tree());
   log('ECHOBOT: I sent ' + to + ': ' + msgtext);
-  _.find(rosters, o => o.jid === to).msgfrom.push({ send: true, from, to, msgtext });
+  if(type==='chat')_.find(rosters, o => o.jid === to).msgfrom.push({ send: true, from, to, msgtext });
 }
 
 
 export default {
-  addHandler(handler, type) {
-    if (!handler) {
-      connection.addHandler(onMessage, null, 'message', null, null, null);
-    } else {
-      connection.addHandler(handler, null, type, null, null, null);
-    }
-  },
+  // addHandler(handler, type) {
+  //   if (!handler) {
+  //     connection.addHandler(onMessage, null, 'message', null, null, null);
+  //   } else {
+  //     connection.addHandler(handler, null, type, null, null, null);
+  //   }
+  // },
   send(msg) {
     connection.send(msg);
   },
